@@ -12,6 +12,10 @@ module.exports = {
     kovan: {
       url: 'https://kovan.infura.io/v3/559430f6da294e8caa01a4992d582713',
       accounts: ['b41c93dd512a8d6d4288650f1152bba3291e3a131c266b35944d4322f28978bd']
+    },
+    harmony_testnet: {
+      url: 'https://api.s0.b.hmny.io',
+      accounts: ['0xdde3346425d4153203b3c5967d121695c699179b08b40a1e3faecc645d8b6195']
     }
   }
 };

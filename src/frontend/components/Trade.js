@@ -9,45 +9,82 @@ import ChainlinkPricingAbi from '../contractsData/ChainlinkPricing.json'
 var utils = require('ethers').utils;
 require('dotenv').config()
 
-let btcValue = 0;
-let ethValue = 0;
-let snxValue = 0;
+const Web3 = require('web3');
+const BN = require('bn.js');
 
 const Trade = ({ marketplace, nft }) => {
+
+  let networkArray = ["Kovan", "Harmony_Testnet"];
+
   const [loading, setLoading] = useState(true)
+  const [priceArray, setPriceArray] = useState([])
 
-  async function getPrices() {
+  async function getPrices(_network) {
 
-    //KOVAN Pricing
-  
-    //let url = 'https://kovan.infura.io/v3/559430f6da294e8caa01a4992d582713';
-    //let provider = new ethers.providers.JsonRpcProvider(url);
-    //const signer = provider.getSigner();
-    const CHAINLINK_PRICING_ADDRESS = '0x05607C44d628DA624802b003B63EB266E0a8D602';
-    // const contractABI = [
-    //   "function getPrices(string memory _network, string[] memory _symbols) public view returns (Price[] memory)"
-    // ];
+    let chainlinkPricing;
+    let chainlinkPricingResult;
+    let symbolArray = new Array()
+    let updatedPriceArray = new Array()
 
-    const provider = new ethers.providers.InfuraProvider("kovan", "559430f6da294e8caa01a4992d582713")
-    //const signer = provider.getSigner()
+    switch(_network)
+    {
+      case "Kovan":
+        symbolArray = ["BTC","SNX","ETH"]
+        const CHAINLINK_PRICING_ADDRESS = '0x05607C44d628DA624802b003B63EB266E0a8D602';
+        const provider = new ethers.providers.InfuraProvider("kovan", "559430f6da294e8caa01a4992d582713")
+        chainlinkPricing = new ethers.Contract(CHAINLINK_PRICING_ADDRESS, ChainlinkPricingAbi.abi, provider);
+        chainlinkPricingResult = await chainlinkPricing.getPrices(_network, symbolArray);
+        break;
+      case "Harmony_Testnet":
+        symbolArray = ["ETH","WBTC","ONE"]
+        const HARMONY_CHAINLINK_PRICING_ADDRESS = '0xE8299215881dc1F8E4C59B647c369EfB0B52fA10';
+        const Harmony_PRIVATE_KEY = '0xdde3346425d4153203b3c5967d121695c699179b08b40a1e3faecc645d8b6195';
+        const Harmony_TESTNET_RPC_URL = 'https://api.s0.b.hmny.io';
+        // const web3 = new Web3(Harmony_TESTNET_RPC_URL);
+        // let hmyMasterAccount = web3.eth.accounts.privateKeyToAccount(Harmony_PRIVATE_KEY);
+        // web3.eth.accounts.wallet.add(hmyMasterAccount);
+        // web3.eth.defaultAccount = hmyMasterAccount.address
 
-    // Contract Instance
-    const chainlinkPricing = new ethers.Contract(CHAINLINK_PRICING_ADDRESS, ChainlinkPricingAbi.abi, provider);
+        //Get the JSON abi interface definition in whichever way you prefer into an object.
+//let myInterface = require('../my_contracts/my_contract_interface.json')
 
-    // For view function
-    let chainlinkPricingResult = await chainlinkPricing.getPrices("Kovan", ["BTC","SNX","ETH"]);
+//Pass in the abi property of the object
+//let contract = new this.web3.eth.Contract(myInterface.abi)
 
-    console.log(chainlinkPricingResult);
+        let web3 = new Web3(new Web3.providers.HttpProvider(Harmony_TESTNET_RPC_URL));
+        let abi = require('../../frontend/contractsData/ChainlinkPricing.json');
+        chainlinkPricing = new web3.eth.Contract(abi.abi, HARMONY_CHAINLINK_PRICING_ADDRESS);
 
-    btcValue = chainlinkPricingResult[0].Price.toNumber() / (10**chainlinkPricingResult[0].Decimals.toNumber());
-    snxValue =  chainlinkPricingResult[1].Price.toNumber() / (10**chainlinkPricingResult[1].Decimals.toNumber());
-    ethValue =  chainlinkPricingResult[2].Price.toNumber() / (10**chainlinkPricingResult[2].Decimals.toNumber());
+        //chainlinkPricing = new web3.eth.Contract(ChainlinkPricingAbi.abi, HARMONY_CHAINLINK_PRICING_ADDRESS);
+        chainlinkPricingResult = await chainlinkPricing.methods.getPrices(_network, symbolArray).call();
+        //    const compAPY = Web3.utils.toBN(((((Math.pow((supplyRatePerBlock / ethMantissa * blocksPerDay) + 1, daysPerYear))) - 1) * 100) * ethMantissa)
+
+        break;
+      default:
+        symbolArray = ["ETH"]
+    }
+
+    for (let i=0; i< symbolArray.length; i++){  
+        let price = chainlinkPricingResult[i].Price;
+        let decimals = chainlinkPricingResult[i].Decimals;
+
+        try{
+            price = chainlinkPricingResult[i].Price.toNumber();
+            decimals = chainlinkPricingResult[i].Decimals.toNumber();
+        }
+        catch {}
+
+        let tokenValue = price / (10**decimals);   
+        updatedPriceArray[i] = {symbol: symbolArray[i], price: tokenValue};
+
+        setPriceArray(updatedPriceArray);
+    }
 
     setLoading(false);
   }
 
   useEffect(() => {
-    getPrices()
+    getPrices(networkArray[1])
   }, [])
 
   if (loading) return (
@@ -60,15 +97,17 @@ const Trade = ({ marketplace, nft }) => {
         <div className="px-5 container">
           <Row xs={1} md={2} lg={4} className="g-4 py-5">   
               <Col className="overflow-hidden">
-                <Card>
-                  <Card.Footer>{btcValue} BTC</Card.Footer>
-                </Card>
-                <Card>
-                  <Card.Footer>{snxValue} SNX</Card.Footer>
-                </Card>
-                <Card>
-                  <Card.Footer>{ethValue} ETH</Card.Footer>
-                </Card>
+              {networkArray.map((name, idx) => (
+                  <Card key={idx}>
+                    <Card.Footer><button onClick={e => getPrices(name)}>{name}</button> 
+                    </Card.Footer>
+                  </Card>
+              ))}
+              {priceArray.map((item, idx) => (
+                  <Card key={idx}>
+                    <Card.Footer>{item.price} {item.symbol} </Card.Footer>
+                  </Card>
+              ))}
               </Col>
            </Row> 
         </div>
