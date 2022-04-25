@@ -24,22 +24,25 @@ function App() {
 
   // MetaMask Login/Connect
   const web3Handler = async () => {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    setAccount(accounts[0])
-    // Get provider from Metamask
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    // Set signer
-    const signer = provider.getSigner()
+    setLoading(false)
+    //return
 
-    window.ethereum.on('chainChanged', (chainId) => {
-      window.location.reload();
-    })
+    // const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    // setAccount(accounts[0])
+    // // Get provider from Metamask
+    // const provider = new ethers.providers.Web3Provider(window.ethereum)
+    // // Set signer
+    // const signer = provider.getSigner()
 
-    window.ethereum.on('accountsChanged', async function (accounts) {
-      setAccount(accounts[0])
-      await web3Handler()
-    })
-    loadContracts(signer)
+    // window.ethereum.on('chainChanged', (chainId) => {
+    //   window.location.reload();
+    // })
+
+    // window.ethereum.on('accountsChanged', async function (accounts) {
+    //   setAccount(accounts[0])
+    //   await web3Handler()
+    // })
+    // loadContracts(signer)
   }
 
   const loadContracts = async (signer) => {
@@ -48,7 +51,7 @@ function App() {
     // setMarketplace(marketplace)
     // const nft = new ethers.Contract(NFTAddress.address, NFTAbi.abi, signer)
     // setNFT(nft)
-    setLoading(false)
+    //setLoading(false)
   }
 
   return (
@@ -59,10 +62,19 @@ function App() {
         </>
         <div>
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-              <Spinner animation="border" style={{ display: 'flex' }} />
-              <p className='mx-3 my-0'>Awaiting Metamask Connection...</p>
-            </div>
+            // <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+            //   <Spinner animation="border" style={{ display: 'flex' }} />
+            //   <p className='mx-3 my-0'>Awaiting Metamask Connection...</p>
+            // </div>
+
+            <Routes>
+            {/* <Route path="/" element={
+              <Trade marketplace={marketplace} nft={nft} />
+            } /> */}
+            <Route path="/" element={
+              <Trade />
+            } />
+            </Routes>
           ) : (
             <Routes>
               {/* <Route path="/" element={
