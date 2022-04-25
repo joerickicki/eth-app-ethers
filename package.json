@@ -21,7 +21,6 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.6.0",
     "ipfs-http-client": "^56.0.2",
-    "next": "^12.1.5",
     "react": "^18.0.0",
     "react-bootstrap": "^2.1.2",
     "react-dom": "^18.0.0",
