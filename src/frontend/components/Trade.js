@@ -29,15 +29,15 @@ const Trade = ({ marketplace, nft }) => {
     switch(_network)
     {
       case "Kovan":
-        symbolArray = ["BTC","SNX","ETH"]
-        const CHAINLINK_PRICING_ADDRESS = '0x05607C44d628DA624802b003B63EB266E0a8D602';
+        symbolArray = ["BTC","SNX","ETH","MANA"]
+        const CHAINLINK_PRICING_ADDRESS = '0xA89a929446f805DF6aaAA47a850D2A025e967A60';
         const provider = new ethers.providers.InfuraProvider("kovan", "559430f6da294e8caa01a4992d582713")
         chainlinkPricing = new ethers.Contract(CHAINLINK_PRICING_ADDRESS, ChainlinkPricingAbi.abi, provider);
         chainlinkPricingResult = await chainlinkPricing.getPrices(_network, symbolArray);
         break;
       case "Harmony_Testnet":
-        symbolArray = ["ETH","WBTC","ONE"]
-        const HARMONY_CHAINLINK_PRICING_ADDRESS = '0xE8299215881dc1F8E4C59B647c369EfB0B52fA10';
+        symbolArray = ["ETH","WBTC","ONE","LINK"]
+        const HARMONY_CHAINLINK_PRICING_ADDRESS = '0x557419017d32262F6696De453178F082c4fb6781';
         const Harmony_PRIVATE_KEY = '0xdde3346425d4153203b3c5967d121695c699179b08b40a1e3faecc645d8b6195';
         const Harmony_TESTNET_RPC_URL = 'https://api.s0.b.hmny.io';
         // const web3 = new Web3(Harmony_TESTNET_RPC_URL);
